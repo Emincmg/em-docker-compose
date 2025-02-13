@@ -1,0 +1,6 @@
+FROM node:18
+
+ENV PORT=3001
+ENV HOST=0.0.0.0
+
+WORKDIR /var/www/html/

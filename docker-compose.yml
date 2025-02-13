@@ -1,0 +1,91 @@
+services:
+  # Laravel app service (PHP-FPM)
+  laravel-app:
+    build:
+      args:
+        user: laravel
+        uid: 1000
+      context: ./laravel-app #change this to your laravel root folder
+      dockerfile: Dockerfile
+    working_dir: /var/www/html
+    image: laravel-app
+    container_name: laravel-app
+    restart: unless-stopped
+    tty: true
+    env_file:
+      - ./laravel-app/.env
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  # Frontend app service (Vue-Nuxt SSR config, unsafe for sensitive data. Use backend instead)
+  vue-app:
+    ports:
+      - "3001:3001"
+    user: node
+    build:
+      context: ./vue-app
+      dockerfile: Dockerfile
+    working_dir: /var/www/html
+    volumes:
+      - ./vue-app:/var/www/html
+    container_name: vue-app
+    command: ["node", ".output/server/index.mjs"]
+    stdin_open: true
+    tty: true
+    networks:
+      - app-network
+
+  # NGINX Web Server
+  nginx:
+    image: nginx:1.25
+    working_dir: /var/www/html
+    container_name: nginx-webserver
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./laravel-app/public:/var/www/html/laravel/public:ro
+      - ./vue-app:/var/www/html/vue
+      - ./nginx/laravel/default.conf:/etc/nginx/conf.d/laravel.conf
+      - ./nginx/vue/default.conf:/etc/nginx/conf.d/vue.conf
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+    networks:
+      - app-network
+
+  # MySQL Database
+  db:
+    image: mysql:5.7
+    container_name: mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_ROOT_PASSWORD: SafePassword # change this to any safe password
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - app-network
+
+  # Certbot container for auto-generating certificates.
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    restart: always
+    volumes:
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done'"
+    networks:
+      - app-network
+networks:
+  app-network:
+    driver: bridge
+volumes:
+  dbdata:
+    driver: local
