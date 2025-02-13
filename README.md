@@ -4,6 +4,13 @@ This project sets up a **Laravel** and **Nuxt.js (Vue.js)** application using **
 
 ---
 
+👤 Maintainer
+
+Ali Emin Çomoğlu
+
+This guide should help you set up and run the em-docker-compose project. If you encounter any issues, feel free to open an issue on the GitHub repository.
+I'd be happy to help you any way i can.
+
 ## **📁 Project Structure**
 
 ```
