@@ -1,6 +1,6 @@
 # **em-docker-compose**
 
-This project sets up a **Laravel** and **Nuxt.js (Vue.js)** application using **Docker Compose** and serves them via **Nginx**. Below are the details on how to set up and use this environment.
+This project sets up a **.NET Core** , **Laravel** and **Nuxt.js (Vue.js)** application using **Docker Compose** and serves them via **Nginx**. Also has official **.NET Runtime, MYSQL Official, SQL Server and Elasticsearch** images. Below are the details on how to set up and use this environment.
 
 ---
 
@@ -15,14 +15,20 @@ I'd be happy to help you any way i can.
 
 ```
 em-docker-compose/
+├── dotnet-core-app/
+│   ├── Dockerfile
+│   └── ... (other .NET project files)
 ├── laravel-app/
-│   ├── public/
-│   └── ... (other Laravel files)
+│   ├── Dockerfile
+│   └── ... (other Laravel project files)
 ├── vue-app/
+│   ├── Dockerfile
 │   ├── .output/
 │   │   └── public/
 │   └── ... (other Nuxt.js files)
 ├── nginx/
+│   ├── dotnet/
+│   │   └── default.conf
 │   ├── laravel/
 │   │   └── default.conf
 │   └── vue/
@@ -31,9 +37,11 @@ em-docker-compose/
 └── LICENSE
 ```
 
+- **dotnet-core-app/**: Contains the .NET Core application.
 - **laravel-app/**: Contains the Laravel application.
 - **vue-app/**: Contains the Nuxt.js application.
 - **nginx/**: Stores the Nginx configuration files.
+    - **dotnet/default.conf**: Nginx configuration for the Dotnet app.
     - **laravel/default.conf**: Nginx configuration for the Laravel app.
     - **vue/default.conf**: Nginx configuration for the Nuxt.js app.
 - **docker-compose.yml**: Defines the services for Docker Compose.
@@ -58,6 +66,10 @@ cd em-docker-compose
 
 ### **2️⃣ Prepare Laravel & Nuxt.js Apps**
 
+#### **.NET Core**
+- Build the **SQL Database (named: sqlserver)** image and provide necessary details to build the image correctly. Check out the documentation of SQL Server installation and configuration [here](https://learn.microsoft.com/en-us/sql/linux/quickstart-install-connect-ubuntu).
+- Structure your laravel app under `dotnet-core-app` folder.
+
 #### **Laravel**
 - Create the **.env** file in `laravel-app/` and configure it.
 - Structure your laravel app under `laravel-app` folder.
@@ -76,13 +88,13 @@ This command builds and runs the services in the background.
 
 ## **⚠️ Notes**
 
-- **Database:** This setup does not include database services. Be sure to add them as required. MYSQL was added by default.
+- **Database:** This setup does not include database services. Be sure to add them as required. SQL Server & MYSQL was added by default.
 - **SSL/TLS:** By default, HTTP is used. See Nginx configs if SSL/TLS is needed.
 - **Restarting Services After Updates:**
 
 ```bash
-docker-compose down
-docker-compose up -d --build
+docker compose down
+docker compose up -d --build
 ```
 
 ---
