@@ -64,7 +64,7 @@ git clone https://github.com/Emincmg/em-docker-compose.git
 cd em-docker-compose
 ```
 
-### **2️⃣ Prepare Laravel & Nuxt.js Apps**
+### **2️⃣ Prepare Apps**
 
 #### **.NET Core**
 - Build the **SQL Database (named: sqlserver)** image and provide necessary details to build the image correctly. Check out the documentation of SQL Server installation and configuration [here](https://learn.microsoft.com/en-us/sql/linux/quickstart-install-connect-ubuntu).
