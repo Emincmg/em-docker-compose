@@ -97,7 +97,7 @@ services:
   sqlserver:
       image: mcr.microsoft.com/mssql/server:2022-CU18-ubuntu-22.04
       environment:
-        MSSQL_SA_PASSWORD: "LocalDev2025"
+        MSSQL_SA_PASSWORD: "SafePassword2025" # change this to any safe password
         ACCEPT_EULA: "Y"
         MSSQL_PID: "Developer"
       volumes:
@@ -107,6 +107,21 @@ services:
       restart: unless-stopped
       networks:
         - app-network
+  
+  # Elasticsearch official image
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.10
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - app-network
       
   # Certbot container for auto-generating certificates.
   certbot:
@@ -127,3 +142,6 @@ volumes:
     driver: local
   sqlserver-data:
       driver: local
+  elasticsearch-data:
+    driver: local
+
