@@ -15,9 +15,28 @@ services:
     env_file:
       - ./laravel-app/.env
     depends_on:
-      - db
+      - mysql
     networks:
       - app-network
+        
+  # .NET Core app service
+  dotnet-app:
+    build:
+      context: ./dotnet-core-app
+      dockerfile: Dockerfile
+    working_dir: /var/www/html
+    image: dotnet-core-app
+    container_name: dotnet-core-app
+    restart: unless-stopped
+    depends_on:
+      - sqlserver
+    ports:
+      - "5000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    networks:
+      - app-network
+        
 
   # Frontend app service (Vue-Nuxt SSR config, unsafe for sensitive data. Use backend instead)
   vue-app:
@@ -49,7 +68,9 @@ services:
     volumes:
       - ./laravel-app/public:/var/www/html/laravel/public:ro
       - ./vue-app:/var/www/html/vue
+      - ./dotnet-core-app:/var/www/html/dotnet:ro
       - ./nginx/laravel/default.conf:/etc/nginx/conf.d/laravel.conf
+      - ./nginx/dotnet/default.conf:/etc/nginx/conf.d/dotnet.conf
       - ./nginx/vue/default.conf:/etc/nginx/conf.d/vue.conf
       - ./certbot/www:/var/www/certbot
       - ./certbot/conf:/etc/letsencrypt
@@ -57,7 +78,7 @@ services:
       - app-network
 
   # MySQL Database
-  db:
+  mysql:
     image: mysql:5.7
     container_name: mysql
     restart: unless-stopped
@@ -68,10 +89,25 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - dbdata:/var/lib/mysql
+      - mysql-data:/var/lib/mysql
     networks:
       - app-network
 
+# MSSQL Server
+  sqlserver:
+      image: mcr.microsoft.com/mssql/server:2022-CU18-ubuntu-22.04
+      environment:
+        MSSQL_SA_PASSWORD: "LocalDev2025"
+        ACCEPT_EULA: "Y"
+        MSSQL_PID: "Developer"
+      volumes:
+        - sqlserver-data:/var/opt/mssql
+      ports:
+        - "1433:1433"
+      restart: unless-stopped
+      networks:
+        - app-network
+      
   # Certbot container for auto-generating certificates.
   certbot:
     image: certbot/certbot
@@ -87,5 +123,7 @@ networks:
   app-network:
     driver: bridge
 volumes:
-  dbdata:
+  mysql-data:
     driver: local
+  sqlserver-data:
+      driver: local
